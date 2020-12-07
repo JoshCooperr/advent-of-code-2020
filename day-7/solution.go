@@ -23,30 +23,7 @@ type Bag struct {
   contains map[*Bag]int
 }
 
-type ExpandedBag struct {
-  colour string
-  contains map[string]int
-  capacity int
-}
-
-func (b *Bag) can_hold(col string) bool {
-  fmt.Println(b.colour, b.contains)
-  for pos, _ := range b.contains {
-    if pos.colour == col {
-      return true
-    } else if pos.can_hold(col) {
-      return true
-    }
-  }
-  return false
-}
-
-func (b *ExpandedBag) can_hold(col string) bool {
-  _, ok := b.contains[col]
-  return ok
-}
-
-func parse_bags(file_lines []string) map[string]*ExpandedBag {
+func parse_bags(file_lines []string) map[string]*Bag {
   bags := map[string]*Bag{}
   for _, line := range file_lines {
     info := strings.Split(line, " bags contain ")
@@ -67,41 +44,38 @@ func parse_bags(file_lines []string) map[string]*ExpandedBag {
       }
     }
   }
+  return bags
+}
 
-  expanded_bags := map[string]*ExpandedBag{}
-  for col, bag := range bags {
-    contains := map[string]int{}
-    capacity := 0
-    to_process := []string{}
-    for b, _ := range bag.contains {
-      to_process = append(to_process, b.colour)
+func bag_contains(bags map[string]*Bag, colour string, desired string) bool {
+  for pos, _ := range bags[colour].contains {
+    if pos.colour == desired {
+      return true
+    } else if bag_contains(bags, pos.colour, desired) {
+      return true
     }
-    for len(to_process) > 0 {
-      c := to_process[0]
-      to_process = to_process[1:]
-      contains[c] = 0
-      for x, v := range bags[c].contains {
-        if _, ok := contains[x.colour]; !ok {
-          to_process = append(to_process, x.colour)
-        }
-        capacity += v
-      }
-    }
-    fmt.Println(col, contains, capacity)
-    expanded_bags[col] = &ExpandedBag{col, contains, capacity}
   }
-  return expanded_bags
+  return false
+}
+
+func num_bags(bags map[string]*Bag, bag *Bag) int {
+  sum := 1
+  for b, amt := range bag.contains {
+    sum += amt * num_bags(bags, bags[b.colour])
+  }
+  return sum
 }
 
 func main() {
-  file_lines := read_file_lines("test-input.txt")
+  file_lines := read_file_lines("input.txt")
   bags := parse_bags(file_lines)
   desired := "shiny gold"
   count := 0
-  for col, bag := range bags {
-    if col != desired && bag.can_hold(desired) {
+  for col, _ := range bags {
+    if col != desired && bag_contains(bags, col, desired) {
       count += 1
     }
   }
   fmt.Println("Number of bags that can hold", desired, ":", count)
+  fmt.Println("Total number of bags", num_bags(bags, bags[desired]) - 1)
 }
