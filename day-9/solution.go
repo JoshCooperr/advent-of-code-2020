@@ -24,11 +24,13 @@ func read_file_lines(fileName string) []int {
 }
 
 func check_sum_exists(nums []int, sum int) bool {
-  for i := 0; i < len(nums); i++ {
-    for j := i + 1; j < len(nums); j++ {
-      if (nums[i] + nums[j]) == sum {
-        return true
-      }
+  hash := map[int]int{}
+  for i, n := range nums {
+    hash[n] = i
+  }
+  for _, n := range nums {
+    if _, ok := hash[sum - n]; ok {
+      return true
     }
   }
   return false
@@ -36,8 +38,7 @@ func check_sum_exists(nums []int, sum int) bool {
 
 func find_non_sum(nums []int, step int) int {
   i := step
-  found := false
-  for !found || i < len(nums) {
+  for i < len(nums) {
     if !check_sum_exists(nums[i - step:i], nums[i]) {
       return nums[i]
     }
