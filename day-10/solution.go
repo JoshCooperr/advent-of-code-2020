@@ -2,6 +2,7 @@ package main
 
 import (
   "fmt"
+  "math"
   "os"
   "io/ioutil"
   "sort"
@@ -34,28 +35,30 @@ func find_jolt_diffs(list []int) (int, int, int) {
   return jolt_diffs[0], jolt_diffs[1], jolt_diffs[2] + 1
 }
 
-func find_num_arrangements(list []int) int {
-  sub_seqs := [][]int{}
-  seq := []int{0}
-  for _, a := range list {
-    seq = append(seq, a)
-    if len(seq) > 1 && (a - seq[len(seq) - 2]) == 3 {
-      sub_seqs = append(sub_seqs, seq)
-      seq = []int{}
+func count_arrangements(list []int) int {
+  memo := map[int]int{}
+  memo[0] = 1
+  for _, n := range list {
+    sum := 0
+    if val, ok := memo[n-3]; ok {
+      sum += val
     }
+    if val, ok := memo[n-2]; ok {
+      sum += val
+    }
+    if val, ok := memo[n-1]; ok {
+      sum += val
+    }
+    memo[n] = sum
   }
-  if len(seq) > 0 {
-    sub_seqs = append(sub_seqs, seq)
-  }
-  fmt.Println(sub_seqs)
-  return 0
+  return memo[list[len(list) - 1]]
 }
 
 func main() {
-  nums := read_file_lines("test-input.txt")
+  nums := read_file_lines("input.txt")
   sort.Ints(nums)
   j1, j2, j3 := find_jolt_diffs(nums)
   fmt.Println("Jolt differences:", j1, j2, j3)
   fmt.Println(j1 * j3)
-  find_num_arrangements(nums)
+  fmt.Println(count_arrangements(nums))
 }
