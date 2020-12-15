@@ -25,12 +25,12 @@ type Instruction struct {
   value string
 }
 
-type Programme struct {
+type Program struct {
   memory map[int]string
   instructions []Instruction
 }
 
-func parse_programme(lines []string) *Programme {
+func parse_program(lines []string) *Program {
   mask := strings.Split(lines[0], " = ")[1]
   instrs := []Instruction{}
   for _, line := range lines[1:] {
@@ -43,7 +43,7 @@ func parse_programme(lines []string) *Programme {
       instrs = append(instrs, Instruction{mask, index, strconv.FormatInt(int64(value), 2)})
    }
   }
-  return &Programme{map[int]string{}, instrs}
+  return &Program{map[int]string{}, instrs}
 }
 
 func pad_zeroes(num string, bits int) string {
@@ -102,7 +102,7 @@ func (i *Instruction) get_indexes() []int {
   return indexes
 }
 
-func (p *Programme) execute() {
+func (p *Program) execute() {
   for _, instr := range p.instructions {
     indexes := instr.get_indexes()
     for _, index := range indexes {
@@ -111,7 +111,7 @@ func (p *Programme) execute() {
   }
 }
 
-func (p *Programme) sum_memory() int {
+func (p *Program) sum_memory() int {
   sum := int64(0)
   for _, val := range p.memory {
     i, _ := strconv.ParseInt(val, 2, 64)
@@ -121,7 +121,7 @@ func (p *Programme) sum_memory() int {
 }
 
 func main() {
-  prog := parse_programme(read_file_lines("input.txt"))
+  prog := parse_program(read_file_lines("input.txt"))
   prog.execute()
   fmt.Println("Part 2:", prog.sum_memory())
 }
